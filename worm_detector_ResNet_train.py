@@ -7,6 +7,9 @@ import torch.nn as nn
 import torch.optim as optim
 from datetime import datetime
 
+# num_epochs = 25  # Define the number of epochs
+num_epochs = 100  # Define the number of epochs
+
 # Define transforms
 # data augmentation: resize, rotate, flip, jitter
 train_transforms = transforms.Compose([
@@ -51,15 +54,13 @@ else:
     device = "cpu"
 
 # mps does not appear to be working correctly in current version of pytorch.
-device = "cpu"
+# device = "cpu"
 
 device = torch.device(device)
 model = model.to(device)
 
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
-
-num_epochs = 25  # Define the number of epochs
 
 for epoch in range(num_epochs):
     model.train()  # Set model to training mode
@@ -88,7 +89,7 @@ for epoch in range(num_epochs):
         running_corrects += torch.sum(preds == labels.data)
 
     epoch_loss = running_loss / len(train_dataset)
-    epoch_acc = running_corrects.double() / len(train_dataset)
+    epoch_acc = running_corrects / len(train_dataset)
 
     # At the end of each training epoch, validate the model
     model.eval()  # Set model to evaluate mode
@@ -109,11 +110,10 @@ for epoch in range(num_epochs):
             val_running_corrects += torch.sum(preds == labels.data)
 
     val_epoch_loss = val_running_loss / len(val_dataset)
-    val_epoch_acc = val_running_corrects.double() / len(val_dataset)
+    val_epoch_acc = val_running_corrects / len(val_dataset)
 
-    print(f'Epoch {epoch}/{num_epochs - 1} Train Loss:      {epoch_loss:.4f}     Acc: {epoch_acc:.4f}')
+    print(f'Epoch {epoch}/{num_epochs - 1} Train Loss:      {epoch_loss:.4f} Acc: {epoch_acc:.4f}')
     print(f'Epoch {epoch}/{num_epochs - 1} Validation Loss: {val_epoch_loss:.4f} Acc: {val_epoch_acc:.4f}')
-
 
 now = datetime.utcnow().strftime('%Y-%m-%d_%H%M')
 torch.save(model.state_dict(), f"models/model_weights_{now}.pth")
