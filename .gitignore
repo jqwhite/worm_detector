@@ -1,5 +1,10 @@
 models/
 worm_categories/
+auto_sorted_data/
+sorted_data/
+*tar*
+*.gz
+
 
 .DS_Store
 ._.DS_Store
