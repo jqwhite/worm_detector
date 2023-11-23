@@ -9,6 +9,7 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
+# should match the training pre-processing
 preprocess_image_size = (128,128)
 
 def find_most_recent_image(directory):
