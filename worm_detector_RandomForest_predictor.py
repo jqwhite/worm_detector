@@ -30,8 +30,6 @@ def find_most_recent_image(directory):
 def preprocess_image(most_recent_image, size=preprocess_image_size):
     """Load an image, resize, and flatten it."""
     image = Image.open(most_recent_image)
-    # np_image = np.array(image_list)
-    # image = Image.fromarray(np_image)
     image = image.resize(size)
     if image.mode != 'L':
         image = image.convert('L')
@@ -53,52 +51,26 @@ label_to_idx_path = args.label_to_idx_path
 image_folder_path = args.image_folder_path
 
 # Load model and label mapping
-# model = joblib.load('models/best_random_forest_model_more_data_2023-11-16_1527.pkl')
-# with open('models/random_forest_labels_to_idx_more_data.json', 'r') as f:
-#     label_to_idx = json.load(f)
-#     idx_to_label = {v: k for k, v in label_to_idx.items()}
 model = joblib.load(model_path)
 with open(label_to_idx_path, 'r') as f:
     label_to_idx = json.load(f)
     idx_to_label = {v: k for k, v in label_to_idx.items()}
 
-# def convert_to_image(np_image):
-#     if len(np_image.shape) == 2:  # Grayscale image
-#         return Image.fromarray(np_image, 'L')
-#     elif len(np_image.shape) == 3 and np_image.shape[2] == 3:  # RGB image
-#         return Image.fromarray(np_image, 'RGB')
-#     else:
-#         raise ValueError("Unsupported image format")
-
-
-
 @app.route('/predict', methods=['GET'])
 def predict():
-    # request_data = request.json
-    # image_data = request_data['image_data']
-    # image_shape = request_data['image_shape']
 
-    # np_image = np.array(image_data).astype(np.uint8).reshape(image_shape)
-
-    # # Convert numpy array to PIL Image
-    # try:
-    #     img = convert_to_image(np_image)
-    # except ValueError as e:
-    #     return jsonify({'error': str(e)}), 400  # Bad request
-
-    # Further preprocessing...
+    # find latest image file
     most_recent_image = find_most_recent_image(image_folder_path)
 
     if not most_recent_image:
         return jsonify({'error': 'No image files found'}), 404
 
-    processed_image = preprocess_image(most_recent_image)#.reshape(1,-1)
-    # prediction = model.predict(processed_image.reshape(1,-1))[0]
+    # preprocessing should match worm_detector_RandomForest_train.py
+    processed_image = preprocess_image(most_recent_image)
     prediction = model.predict([processed_image])[0]
-    # print(prediction)
     predicted_label = idx_to_label[prediction]
-    # return jsonify({'prediction': 1 if predicted_label == 'enough' else 0})
-    return jsonify({'prediction': predicted_label})
+    return jsonify({'prediction': 1 if predicted_label == 'enough' else 0})
+    # return jsonify({'prediction': predicted_label})
 
 if __name__ == '__main__':
     app.run(debug=True)
